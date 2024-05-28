@@ -17,6 +17,7 @@ import dev.restate.sdk.common.TerminalException
 import dev.restate.sdk.examples.clients.PaymentClient
 import dev.restate.sdk.examples.clients.RestaurantClient
 import dev.restate.sdk.examples.utils.GeoUtils
+import dev.restate.sdk.http.vertx.RestateHttpEndpointBuilder
 import dev.restate.sdk.kotlin.*
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -41,7 +42,7 @@ class OrderWorkflow {
 
     // --- 💳 Payment
     val token: String = ctx.random().nextUUID().toString()
-    val paid: Boolean = ctx.runBlock { PaymentClient.charge(order.orderId, token, order.totalCost) }
+    val paid: Boolean = ctx.runBlock ("payment") { PaymentClient.charge(order.orderId, token, order.totalCost) }
     if (!paid) {
       ctx.set(STATUS, Status.REJECTED)
       return
@@ -137,4 +138,8 @@ class OrderWorkflow {
                 order.orderId, order.restaurantId, restaurantLocation, customerLocation))
         .await()
   }
+}
+
+fun main() {
+  RestateHttpEndpointBuilder.builder().bind(OrderWorkflow()).buildAndListen(9080)
 }

@@ -22,7 +22,7 @@ object RestaurantClient {
       System.getenv("RESTAURANT_ENDPOINT") ?: "http://localhost:5050"
 
   fun prepare(orderId: String, callbackId: String) {
-    this.call(orderId, callbackId, "/prepare")
+    call(orderId, callbackId, "/prepare")
   }
 
   private fun call(orderId: String, callbackId: String, method: String) {

@@ -16,9 +16,13 @@ import org.apache.logging.log4j.Logger
 object PaymentClient {
   private val logger: Logger = LogManager.getLogger(PaymentClient::class.java)
 
-  fun charge(id: String?, token: String?, amount: Double): Boolean {
+  fun charge(id: String, token: String, amount: Double): Boolean {
     logger.info(String.format("[%s] Executing payment with token %s for %.2f", id, token, amount))
-    // ... do the call ...
+    if (Math.random() < 0.5) {
+      logger.debug("A payment failure happened!")
+      throw RuntimeException("A payment failure happened!")
+    }
+    logger.debug("Payment success!")
     return true
   }
 }

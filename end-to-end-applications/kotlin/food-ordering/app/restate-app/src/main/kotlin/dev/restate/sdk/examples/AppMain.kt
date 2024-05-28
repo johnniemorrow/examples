@@ -15,10 +15,9 @@ import dev.restate.sdk.http.vertx.RestateHttpEndpointBuilder
 
 fun main() {
   RestateHttpEndpointBuilder.builder()
-      .bind(OrderWorkflow())
       .bind(OrderETAService())
       .bind(DriverDeliveryMatcher())
       .bind(DriverDigitalTwin())
       .bind(DriverMobileAppSimulator()) // external mobile app on driver's phone
-      .buildAndListen()
+      .buildAndListen(9081)
 }
