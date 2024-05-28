@@ -1,0 +1,19 @@
+{
+  "name": "restate-examples-patterns-sync-async-task",
+  "version": "0.8.0",
+  "description": "Example to Restate on how to navigate from a sync to an async task",
+  "main": "app.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc --noEmitOnError",
+    "async": "ts-node ./src/simple_async_task.ts"
+  },
+  "dependencies": {
+    "@restatedev/restate-sdk": "dev"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
