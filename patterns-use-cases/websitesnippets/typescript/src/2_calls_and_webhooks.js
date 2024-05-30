@@ -8,7 +8,7 @@ const paymentSvc = restate.service({
     processPayment: async (ctx, request) => {
       const webhookPromise = ctx.awakeable();
 
-      let paymentIntent = await ctx.run("stripe call", () =>
+      const paymentIntent = await ctx.run("stripe call", () =>
         createPaymentIntent({
           request,
           metadata: { restate_callback_id: webhookPromise.id }
@@ -17,10 +17,11 @@ const paymentSvc = restate.service({
 
       if (paymentIntent.status === "processing") {
         // synchronous response inconclusive, await webhook response
-        paymentIntent = await webhookPromise.promise;
+        const paymentIntentFromWebhook = await webhookPromise.promise;
+        return verifyPayment(paymentIntentFromWebhook);
+      } else {
+        return verifyPayment(paymentIntent);
       }
-
-      verifyPayment(paymentIntent);
     },
 
     processWebhook: async (ctx) => {
