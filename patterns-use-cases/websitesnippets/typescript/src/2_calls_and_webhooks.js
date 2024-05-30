@@ -24,8 +24,7 @@ const paymentSvc = restate.service({
     },
 
     processWebhook: async (ctx) => {
-      const event = parseWebhookCall(ctx.request());
-      const paymentIntent = event.data.object;
+      const paymentIntent = verifyAndParseEvent(ctx.request());
       const webhookPromiseId = paymentIntent.metadata.restate_callback_id;
       ctx.resolveAwakeable(webhookPromiseId, paymentIntent);
     }
@@ -43,7 +42,7 @@ const webHookSecret = "whsec_...";
 
 const stripe = new Stripe(stripeSecretKey, { apiVersion: "2023-10-16" });
 
-function parseWebhookCall(req) {
+function verifyAndParseEvent(req) {
   const requestBody = req.body;
   const signature = req.headers.get("stripe-signature");
   if (!signature) {
@@ -56,7 +55,7 @@ function parseWebhookCall(req) {
       requestBody,
       signature,
       webHookSecret
-    );
+    ).data.object;
   } catch (err) {
     throw new restate.TerminalError(`Webhook Error: ${err}`, {
       errorCode: 400,
