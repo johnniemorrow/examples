@@ -7,9 +7,10 @@ const eventEnricher = restate.object({
   name: "eventEnricher",
   handlers: {
     userEvent: async (ctx, event) => {
-      // remember event, wait for 100 ms to collect context, then emit
+      // remember event, time box 100 ms to collect features
+      // before emitting result
       ctx.set("user", event);
-      ctx.serviceSendClient(eventJoiner, { delay: 100 }).emit();
+      ctx.serviceSendClient(eventEnricher, { delay: 100 }).emit();
     },
 
     featureEvent: async (ctx, featureEvent) => {
