@@ -14,10 +14,9 @@ package my.example;
 import dev.restate.sdk.http.vertx.RestateHttpEndpointBuilder;
 import my.example.a_workflows_as_code.RoleUpdateService;
 import my.example.b_calls_and_webhooks.PaymentService;
-import my.example.c_async_tasks.AsyncTaskService;
+import my.example.c_async_tasks.utils.AsyncTaskService;
 import my.example.d_state_machine.PaymentStateMachine;
 import my.example.e_durable_signals.SecretVerifier;
-import my.example.f_idempotency.IdempotentReservationService;
 import my.example.g_sagas.ReservationService;
 import my.example.h_stateful_event_processing.EventEnricher;
 

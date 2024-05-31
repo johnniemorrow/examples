@@ -1,9 +1,11 @@
 package my.example.h_stateful_event_processing.types;
 
+import java.util.List;
+
 public class User {
 
     private String userId;
-    private Feature feature;
+    private List<Feature> features;
 
     public User() {
     }
@@ -12,7 +14,7 @@ public class User {
         this.userId = userId;
     }
 
-    public void setFeature(Feature feature) {
-        this.feature = feature;
+    public void addFeature(Feature feature) {
+        this.features.add(feature);
     }
 }

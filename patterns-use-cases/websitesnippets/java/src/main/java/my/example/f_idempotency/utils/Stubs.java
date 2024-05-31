@@ -2,12 +2,11 @@ package my.example.f_idempotency.utils;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import dev.restate.sdk.client.CallRequestOptions;
-import my.example.c_async_tasks.types.PaymentRequest;
 import my.example.f_idempotency.types.Reservation;
 import my.example.f_idempotency.types.ReservationRequest;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
@@ -25,7 +24,7 @@ public class Stubs {
         return server;
     }
 
-    public static ReservationRequest parseToReservationRequest(HttpExchange t){
+    public static ReservationRequest parseRequest(InputStream in){
         return new ReservationRequest("id-123", "pm_card_visa");
     }
 

@@ -12,16 +12,17 @@
 package my.example.b_calls_and_webhooks;
 
 import com.stripe.model.PaymentIntent;
-import dev.restate.sdk.Awakeable;
 import dev.restate.sdk.Context;
 import dev.restate.sdk.annotation.Handler;
 import dev.restate.sdk.annotation.Service;
 import my.example.b_calls_and_webhooks.types.PaymentRequest;
 import my.example.b_calls_and_webhooks.utils.PaymentUtils;
 
-import static my.example.b_calls_and_webhooks.utils.PaymentUtils.paymentIntentSerde;
+import java.util.Map;
+
+import static my.example.b_calls_and_webhooks.utils.PaymentUtils.SERDE;
 import static my.example.b_calls_and_webhooks.utils.PaymentUtils.verifyPayment;
-import static my.example.b_calls_and_webhooks.utils.StripeUtils.createPaymentIntent;
+import static my.example.b_calls_and_webhooks.utils.StripeUtils.submitPayment;
 import static my.example.b_calls_and_webhooks.utils.StripeUtils.verifyAndParseEvent;
 
 // *** BEGIN SNIPPET ***
@@ -29,28 +30,29 @@ import static my.example.b_calls_and_webhooks.utils.StripeUtils.verifyAndParseEv
 @Service
 public class PaymentService {
 
-    @Handler
-    public void processPayment(Context ctx, PaymentRequest request) {
-        Awakeable<PaymentIntent> webhookPromise = ctx.awakeable(paymentIntentSerde);
+  @Handler
+  public void processPayment(Context ctx, PaymentRequest request) {
+    var webhookFuture = ctx.awakeable(SERDE);
 
-        PaymentIntent paymentIntent = ctx.run("Stripe call", paymentIntentSerde,
-            () -> createPaymentIntent(request, webhookPromise.id()));
+    var payment = ctx.run("Stripe call", SERDE, () -> submitPayment(
+            request, Map.of("restate_callback_id", webhookFuture.id())
+    ));
 
-        if (paymentIntent.getStatus().equals("processing")) {
-            // synchronous response inconclusive, await webhook response
-            PaymentIntent updatedIntent = webhookPromise.await();
-            verifyPayment(updatedIntent);
-        } else {
-            verifyPayment(paymentIntent);
-        }
+    if (payment.getStatus().equals("processing")) {
+      // synchronous response inconclusive, await webhook response
+      var updatedPayment = webhookFuture.await();
+      verifyPayment(updatedPayment);
+    } else {
+      verifyPayment(payment);
     }
+  }
 
-    @Handler
-    public void processWebhook(Context ctx) {
-        PaymentIntent paymentIntent = verifyAndParseEvent(ctx.request());
-        String webhookPromise = paymentIntent.getMetadata().get(PaymentUtils.RESTATE_CALLBACK_ID);
-        ctx.awakeableHandle(webhookPromise).resolve(paymentIntentSerde, paymentIntent);
-    }
+  @Handler
+  public void processWebhook(Context ctx) {
+    var paymentEvent = verifyAndParseEvent(ctx.request());
+    String callbackId = paymentEvent.getMetadata().get("restate_callback_id");
+    ctx.awakeableHandle(callbackId).resolve(SERDE, paymentEvent);
+  }
 }
 
 // *** END SNIPPET ***

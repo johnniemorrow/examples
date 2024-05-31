@@ -15,7 +15,7 @@ import static my.example.e_durable_signals.utils.Stubs.sendEmailWithLink;
 @Workflow
 public class SecretVerifier {
 
-    DurablePromiseKey<String> EMAIL_CLICKED =
+    static final DurablePromiseKey<String> EMAIL_CLICKED =
             DurablePromiseKey.of("email_clicked", JsonSerdes.STRING);
 
     @Workflow
@@ -24,13 +24,13 @@ public class SecretVerifier {
         ctx.run("send email",
             () -> sendEmailWithLink(email, secret));
 
-        String clickSecret = ctx.durablePromise(EMAIL_CLICKED).awaitable().await();
+        String clickSecret = ctx.promise(EMAIL_CLICKED).awaitable().await();
         return clickSecret.equals(secret);
     }
 
     @Handler
     public void click(SharedWorkflowContext ctx, String secret) {
-        ctx.durablePromiseHandle(EMAIL_CLICKED).resolve(secret);
+        ctx.promiseHandle(EMAIL_CLICKED).resolve(secret);
     }
 }
 

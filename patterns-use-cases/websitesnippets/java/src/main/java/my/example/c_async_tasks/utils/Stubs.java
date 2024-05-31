@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import dev.restate.sdk.client.CallRequestOptions;
+import dev.restate.sdk.client.SendResponse;
 import my.example.c_async_tasks.types.PaymentRequest;
 
 import java.io.BufferedReader;
@@ -12,11 +13,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
 
 public class Stubs {
 
-    public static final String RESTATE_RUNTIME_ENDPOINT = "http://localhost:8080";
+    public static final String RESTATE_URI = "http://localhost:8080";
 
     public static CallRequestOptions idempotencyKey(String idempotencyKey) {
         return CallRequestOptions.DEFAULT.withIdempotency(idempotencyKey);
@@ -35,7 +36,7 @@ public class Stubs {
         return "Payment processed";
     }
 
-    public static PaymentRequest parseToPaymentRequest(HttpExchange t){
+    public static PaymentRequest parsePaymentRequest(HttpExchange t){
         String request = parseToString(t);
         try {
             return new ObjectMapper().readValue(request, PaymentRequest.class);
@@ -68,10 +69,15 @@ public class Stubs {
         }
     }
 
-    public static void sendResponse(HttpExchange t, String response) throws IOException {
-        t.sendResponseHeaders(200, response.length());
+    public static void respondJson(HttpExchange t, SendResponse response) throws IOException {
+        throw new Error("unimplemented");
+    }
+
+    public static void respond(HttpExchange t, String response) throws IOException {
+        final byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+        t.sendResponseHeaders(200, bytes.length);
         OutputStream os = t.getResponseBody();
-        os.write(response.getBytes());
+        os.write(bytes);
         os.close();
     }
 }

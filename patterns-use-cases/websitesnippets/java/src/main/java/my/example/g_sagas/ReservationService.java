@@ -3,31 +3,34 @@ package my.example.g_sagas;
 import dev.restate.sdk.Context;
 import dev.restate.sdk.annotation.Handler;
 import dev.restate.sdk.annotation.Service;
+import dev.restate.sdk.common.Serde;
 import dev.restate.sdk.common.TerminalException;
 import dev.restate.sdk.serde.jackson.JacksonSerdes;
 import my.example.g_sagas.types.Product;
 import my.example.g_sagas.types.Reservation;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 
 import static my.example.g_sagas.utils.Stubs.cancelReservation;
 import static my.example.g_sagas.utils.Stubs.reserve;
 
-// *** BEGIN SNIPPET ***
+
 
 @Service
 public class ReservationService {
 
-    @Handler
-    public void processPayment(Context ctx, Product[] products) {
+    private static final Serde<Reservation> RESERVE_SERDE = JacksonSerdes.of(Reservation.class);
 
-        final Deque<Reservation> reservations = new ArrayDeque<>();
+    // *** BEGIN SNIPPET ***
+
+    @Handler
+    public void reserveAllProducts(Context ctx, Product[] products) {
+        final List<Reservation> reservations = new ArrayList<>();
         try {
             for (Product product : products) {
-                Reservation res = ctx.run("Product reservation " + product.getId(),
-                    JacksonSerdes.of(Reservation.class),
-                    () -> reserve(product)
+                Reservation res = ctx.run("Reserve " + product.getId(),
+                    RESERVE_SERDE, () -> reserve(product)
                 );
                 reservations.add(res);
             }
@@ -38,6 +41,8 @@ public class ReservationService {
             throw e;
         }
     }
+
+    // *** END SNIPPET ***
 }
 
-// *** END SNIPPET ***
+

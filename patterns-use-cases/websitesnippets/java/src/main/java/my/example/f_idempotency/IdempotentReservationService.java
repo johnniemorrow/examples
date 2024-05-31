@@ -10,24 +10,34 @@ import java.io.IOException;
 
 import static my.example.f_idempotency.utils.Stubs.*;
 
-// *** BEGIN SNIPPET ***
+
 
 public class IdempotentReservationService {
-    public static void main(String[] args) throws IOException {
-        HttpServer server = createHttpServer();
+  public static void main(String[] args) throws IOException {
 
-        server.createContext("/reserve", httpExchange -> {
-            ReservationRequest req = parseToReservationRequest(httpExchange);
+    HttpServer server = createHttpServer();
 
-            Reservation reservation = ProductServiceClient.fromIngress(RESTATE_RUNTIME_ENDPOINT)
-                .reserve(req.getProduct(),
-                    CallRequestOptions.DEFAULT.withIdempotency(req.getReservationId()));
+    // *** BEGIN SNIPPET ***
 
-            sendResponse(httpExchange, reservation);
-        });
+    server.createContext("/reserve", httpExchange -> {
+      ReservationRequest req = parseRequest(httpExchange.getRequestBody());
 
-        server.start();
-    }
+      // derive an idempotency key from the parameters
+      var idempotencyOps = CallRequestOptions.DEFAULT
+          .withIdempotency(req.getReservationId());
+
+      // add idempotency opts to the request to let the service automatically
+      // fuse repeated requests
+      Reservation reservation = ProductServiceClient
+          .fromIngress(RESTATE_RUNTIME_ENDPOINT)
+          .reserve(req.getProduct(), idempotencyOps);
+
+      sendResponse(httpExchange, reservation);
+    });
+
+    // *** END SNIPPET ***
+
+    server.start();
+  }
 }
 
-// *** END SNIPPET ***

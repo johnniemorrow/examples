@@ -1,4 +1,4 @@
-package my.example.c_async_tasks;
+package my.example.c_async_tasks.utils;
 
 import dev.restate.sdk.Context;
 import dev.restate.sdk.annotation.Handler;
@@ -19,6 +19,8 @@ public class AsyncTaskService {
         return handlePayment(req);
     }
 }
+
+// ------ client ------
 
 // *** END SNIPPET ***
 

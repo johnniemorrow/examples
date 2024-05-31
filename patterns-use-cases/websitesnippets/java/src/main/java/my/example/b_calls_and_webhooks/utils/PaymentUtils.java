@@ -15,14 +15,12 @@ import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.net.ApiResource;
 import dev.restate.sdk.common.Serde;
-import dev.restate.sdk.common.TerminalException;
-import my.example.b_calls_and_webhooks.types.PaymentRequest;
 
 public class PaymentUtils {
 
   public static final String RESTATE_CALLBACK_ID = "restate_callback_id";
 
-  public static final Serde<PaymentIntent> paymentIntentSerde =
+  public static final Serde<PaymentIntent> SERDE =
           Serde.using(
                   intent -> intent.toJson().getBytes(),
                   bytes -> ApiResource.GSON.fromJson(new String(bytes), PaymentIntent.class));

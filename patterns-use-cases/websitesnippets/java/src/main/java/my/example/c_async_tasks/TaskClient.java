@@ -1,46 +1,46 @@
 package my.example.c_async_tasks;
 
 import com.sun.net.httpserver.HttpServer;
-import dev.restate.sdk.JsonSerdes;
 import dev.restate.sdk.client.IngressClient;
+import dev.restate.sdk.client.SendResponse;
 import my.example.c_async_tasks.types.PaymentRequest;
+import my.example.c_async_tasks.utils.AsyncTaskServiceClient;
 
 import java.io.IOException;
 
 import static my.example.c_async_tasks.utils.Stubs.*;
+import static dev.restate.sdk.JsonSerdes.STRING;
 
-// *** BEGIN SNIPPET ***
-
-// ------ client ------
 public class TaskClient {
-    public static void main(String[] args) throws IOException {
-        HttpServer server = createHttpServer();
+  public static void main(String[] args) throws IOException {
+    HttpServer server = createHttpServer();
 
-        // submit the payment task
-        server.createContext("/charge", httpExchange -> {
-            PaymentRequest req = parseToPaymentRequest(httpExchange);
+    // *** BEGIN SNIPPET ***
 
-            String handle = AsyncTaskServiceClient.fromIngress(RESTATE_RUNTIME_ENDPOINT)
-                    .send()
-                    .processPayment(req, idempotencyKey(req.getPaymentId()));
+    // --- start payment task ---
+    server.createContext("/charge", httpExchange -> {
+      PaymentRequest req = parsePaymentRequest(httpExchange);
 
-            sendResponse(httpExchange, handle);
-        });
+      SendResponse handle = AsyncTaskServiceClient
+          .fromIngress(RESTATE_URI)
+          .send()
+          .processPayment(req, idempotencyKey(req.getPaymentId()));
 
-        // await the payment task
-        server.createContext("/status", httpExchange -> {
-            String handle = parseToHandle(httpExchange);
+      respondJson(httpExchange, handle);
+    });
 
-            System.out.println("Awaiting payment task: " + handle);
-            String response = IngressClient.defaultClient(RESTATE_RUNTIME_ENDPOINT)
-                    .invocationHandle(handle, JsonSerdes.STRING)
-                    .attach();
-            System.out.println("Payment task completed: " + response);
-            sendResponse(httpExchange, response);
-        });
+    //  --- connect to payment result ---
+    server.createContext("/status", httpExchange -> {
+      String handle = parseToHandle(httpExchange);
 
-        server.start();
-    }
+      String response = IngressClient.defaultClient(RESTATE_URI)
+          .invocationHandle(handle, STRING)
+          .attach();
+      respond(httpExchange, response);
+    });
+
+    // *** END SNIPPET ***
+
+    server.start();
+  }
 }
-
-// *** END SNIPPET ***

@@ -16,7 +16,6 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
-import com.stripe.net.RequestOptions;
 import com.stripe.net.Webhook;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.PaymentIntentCreateParams.ConfirmationMethod;
@@ -35,7 +34,7 @@ public class StripeUtils {
   private static final String webhookSecret = "whsec_...";
   private static final StripeClient stripe = StripeClient.builder().setApiKey(stripeSecretKey).build();
 
-  public static PaymentIntent createPaymentIntent(PaymentRequest request, String webhookPromiseId) {
+  public static PaymentIntent submitPayment(PaymentRequest request, Map<String, String> metadata) {
 
     try {
       PaymentIntent paymentIntent =
@@ -49,9 +48,8 @@ public class StripeUtils {
                       .setConfirm(true)
                       .setConfirmationMethod(ConfirmationMethod.AUTOMATIC)
                       .setReturnUrl("https://restate.dev/")
-                      .putMetadata("restate_callback_id", webhookPromiseId)
-                      .build(),
-                  RequestOptions.builder().setIdempotencyKey(webhookPromiseId).build());
+                      .putAllMetadata(metadata)
+                      .build());
 
       if (request.isDelayed()) {
         paymentIntent.setStatus("processing");
