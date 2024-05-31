@@ -11,17 +11,17 @@
 package my.example.c_async_tasks.types;
 
 public class PaymentRequest {
-  private final String paymentId;
-  private final Long amount;
-  private final String paymentMethodId;
-  private final boolean delayedStatus;
+  private String paymentId;
+  private Long amount;
+  private String paymentMethodId;
 
-  public PaymentRequest(String paymentId, Long amount, String paymentMethodId, boolean delayedStatus) {
+  public PaymentRequest(String paymentId, Long amount, String paymentMethodId) {
     this.paymentId = paymentId;
     this.amount = amount;
     this.paymentMethodId = paymentMethodId;
-    this.delayedStatus = delayedStatus;
   }
+
+  public PaymentRequest(){}
 
   public String getPaymentId() {
     return paymentId;
@@ -33,9 +33,5 @@ public class PaymentRequest {
 
   public String getPaymentMethodId() {
     return paymentMethodId;
-  }
-
-  public boolean isDelayed() {
-    return delayedStatus;
   }
 }
