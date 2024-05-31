@@ -16,7 +16,7 @@ import static my.example.d_state_machine.utils.Stubs.wireFunds;
 // *** BEGIN SNIPPET ***
 
 @VirtualObject
-public class PaymentService {
+public class PaymentStateMachine {
 
     StateKey<Status> STATUS =
         StateKey.of("status", JacksonSerdes.of(Status.class));
