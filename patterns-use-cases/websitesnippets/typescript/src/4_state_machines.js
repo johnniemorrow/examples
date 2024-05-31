@@ -11,7 +11,7 @@ const paymentSvc = restate.object({
         case "CANCELLED":
             return `${paymentId} was cancelled before`;
         case "SUCCESS":
-            return `${paymentId} previously complated`;
+            return `${paymentId} previously completed`;
       }
 
       wireFunds(payment);
