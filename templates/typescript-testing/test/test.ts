@@ -1,6 +1,7 @@
 import { RestateTestEnvironment } from "./restate_test_environment";
-import { exampleService } from "../src/example_service";
+import {ServiceOne, serviceOne} from "../src/service_one";
 import * as clients from "@restatedev/restate-sdk-clients";
+import {ObjectTwo, objectTwo} from "../src/object_two";
 
 describe("ExampleService", () => {
     let restateTestEnvironment: RestateTestEnvironment;
@@ -9,7 +10,7 @@ describe("ExampleService", () => {
     beforeAll(async () => {
         restateTestEnvironment = await RestateTestEnvironment.start(
             (restateServer) =>
-                restateServer.bind(exampleService)
+                restateServer.bind(serviceOne).bind(objectTwo)
         );
     }, 20_000);
 
@@ -22,10 +23,18 @@ describe("ExampleService", () => {
 
     it("works", async () => {
         const rs = clients.connect({url: restateTestEnvironment.baseUrl()});
-        const greet = await rs.serviceClient(exampleService)
+        // Schedule task
+        rs.serviceSendClient(ServiceOne)
             .greet("Sarah");
 
-        // Assert the result
-        expect(greet).toBe("Hello Sarah!");
+        // Wait until the task and all following subtasks are finished
+        // This works for one-way calls but not for delayed calls
+        await restateTestEnvironment.waitUntilFinished()
+
+        // Get the state for the nested object call after the call has finished
+        const state = await restateTestEnvironment.getKVState(ObjectTwo.name, "Sarah");
+
+        const count = +state.find(e => e.key === "count").value_utf8;
+        expect(count).toBe(2);
     });
 });

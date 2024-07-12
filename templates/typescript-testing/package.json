@@ -14,12 +14,15 @@
     "test": "DEBUG=testcontainers,testcontainers:exec,testcontainers:containers jest --maxWorkers=1 --detectOpenHandles"
   },
   "dependencies": {
+    "@restatedev/restate": "^1.0.2",
     "@restatedev/restate-sdk": "^1.0.1",
-    "@restatedev/restate-sdk-clients": "^1.0.1"
+    "@restatedev/restate-sdk-clients": "^1.0.1",
+    "pg": "^8.12.0"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "@types/node": "^20.14.2",
+    "@types/pg": "^8.11.6",
     "esbuild": "^0.21.5",
     "testcontainers": "^10.4.0",
     "ts-jest": "^29.0.5",

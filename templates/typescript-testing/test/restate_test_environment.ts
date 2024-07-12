@@ -8,6 +8,7 @@ import {
 } from "testcontainers";
 import * as http2 from "http2";
 import * as net from "net";
+import { Client } from "pg"; // PostgreSQL client for executing queries
 
 // Prepare the restate server
 async function prepareRestateEndpoint(
@@ -40,7 +41,7 @@ async function prepareRestateTestContainer(
         "docker.io/restatedev/restate:1.0.1"
     )
         // Expose ports
-        .withExposedPorts(8080, 9070)
+        .withExposedPorts(8080, 9070, 9071)
         // Wait start on health checks
         .withWaitStrategy(
             Wait.forAll([
@@ -106,6 +107,40 @@ export class RestateTestEnvironment {
         return `http://${this.startedRestateContainer.getHost()}:${this.startedRestateContainer.getMappedPort(
             9070
         )}`;
+    }
+
+    public async waitUntilFinished(): Promise<void> {
+        const client = new Client({
+            host: this.startedRestateContainer.getHost(),
+            port: this.startedRestateContainer.getMappedPort(9071),
+        });
+
+        await client.connect();
+
+        while (true) {
+            const resultInvocations = await client.query("SELECT * FROM sys_invocation;");
+            const resultInbox = await client.query("SELECT * FROM sys_inbox;");
+
+            if (resultInbox.rows.length + resultInvocations.rows.length === 0) {
+                break;
+            }
+            await new Promise( resolve => setTimeout(resolve, 50) );
+        }
+
+        await client.end();
+    }
+
+    public async getKVState(objectName: string, objectKey: string): Promise<any[]> {
+        const client = new Client({
+            host: this.startedRestateContainer.getHost(),
+            port: this.startedRestateContainer.getMappedPort(9071),
+        });
+
+        await client.connect();
+        const state = await client.query(`SELECT * from state where service_name = '${objectName}' and service_key = '${objectKey}';`);
+        await client.end();
+
+        return state.rows;
     }
 
     public async stop() {

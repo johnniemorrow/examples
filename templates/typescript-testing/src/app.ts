@@ -1,5 +1,6 @@
 import * as restate from "@restatedev/restate-sdk";
-import {exampleService} from "./example_service";
+import {serviceOne} from "./service_one";
+import {objectTwo} from "./object_two";
 
 // Template of a Restate service and handler
 //
@@ -8,6 +9,7 @@ import {exampleService} from "./example_service";
 
 // Create the Restate server to accept requests
 restate
-  .endpoint()
-  .bind( exampleService )
-  .listen(9080);
+    .endpoint()
+    .bind(serviceOne)
+    .bind(objectTwo)
+    .listen(9080);
